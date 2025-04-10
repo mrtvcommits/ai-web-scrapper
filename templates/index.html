@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Web Scraper</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="toggle-theme">
+    <input type="checkbox" id="theme-toggle" />
+    <label for="theme-toggle"></label>
+  </div>
+  <div class="container">
+    <h1>AI Web Scraper</h1>
+    <p class="tagline">Extract intelligence from any website</p>
+
+    <form method="POST" action="/scrape">
+      <div class="form-group">
+        <label for="url">Enter Website URL:</label>
+        <input type="text" id="url" name="url" placeholder="https://example.com" required>
+      </div>
+      <!-- Status / Loader Area -->
+      <div id="status-area" style="display: none;">
+        <div class="loader"></div>
+        <p id="status-message">Processing, please wait...</p>
+      </div>
+      <div class="button_div">
+        <button type="submit">Scrape Website</button>
+      </div>
+    </form>
+  </div>
+</body>
+<script>
+  const toggle = document.getElementById('theme-toggle');
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  toggle.checked = currentTheme === 'dark';
+
+  toggle.addEventListener('change', () => {
+    const theme = toggle.checked ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  });
+</script>
+<script>
+  // Show the status area when any form is submitted
+  document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+      form.addEventListener('submit', function() {
+        document.getElementById('status-area').style.display = 'block';
+      });
+    });
+  });
+</script>
+<script>
+  // Function to poll the /status endpoint and update the status message on the page
+  function pollStatus() {
+    fetch('/status')
+      .then(response => response.json())
+      .then(data => {
+        // Update the status message text
+        document.getElementById('status-message').innerText = data.message || "Idle";
+
+        // Show or hide the status area based on the message content
+        if (data.message && data.message.trim() !== "") {
+          document.getElementById('status-area').style.display = 'block';
+        } else {
+          document.getElementById('status-area').style.display = 'none';
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching status:', error);
+      });
+  }
+
+  // Poll the status endpoint every second (1000ms)
+  setInterval(pollStatus, 1000);
+</script>
+
+</html>

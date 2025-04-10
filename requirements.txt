@@ -1,0 +1,14 @@
+# Dev environment
+pip
+autopep8
+
+# App
+flask
+langchain 
+langchain_ollama
+selenium
+beautifulsoup4
+lxml 
+html5lib
+python-dotenv
+langchain-google-genai

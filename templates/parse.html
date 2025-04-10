@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Web Scraper - Parse</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="toggle-theme">
+    <input type="checkbox" id="theme-toggle" />
+    <label for="theme-toggle"></label>
+  </div>
+  <div class="container">
+    <h1>AI Web Scraper</h1>
+
+    <div class="content-section">
+      <h2>Cleaned DOM Content</h2>
+      <!-- Collapsible section using the details element -->
+      <details>
+        <summary>Show/Hide DOM Content</summary>
+        <textarea readonly rows="10">{{ dom_content }}</textarea>
+      </details>
+    </div>
+
+    <form method="POST" action="/parse">
+      <!-- Include scraped content as hidden input -->
+      <input type="hidden" name="dom_content" value="{{ dom_content }}">
+      <div class="form-group">
+        <label for="parse_description">Describe what you want to parse:</label>
+        <textarea id="parse_description" name="parse_description" rows="4" placeholder="{{parse_description}}" required></textarea>
+      </div>
+      <!-- Status / Loader Area -->
+      <div id="status-area" style="display: none;">
+        <div class="loader"></div>
+        <p id="status-message"></p>
+      </div>
+      <button type="submit">ASK</button>
+    </form>
+
+    {% if parsed_result %}
+    <div class="content-section">
+      <h2>Parsed Result</h2>
+      <!-- Use `|safe` so Jinja won't escape HTML tags -->
+      <div>{{ parsed_result|safe }}</div>
+    </div>
+    {% endif %}
+    
+  </div>
+</body>
+<script>
+  const toggle = document.getElementById('theme-toggle');
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  toggle.checked = currentTheme === 'dark';
+
+  toggle.addEventListener('change', () => {
+    const theme = toggle.checked ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  });
+</script>
+<script>
+  // Show the status area when any form is submitted
+  document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+      form.addEventListener('submit', function() {
+        document.getElementById('status-area').style.display = 'block';
+      });
+    });
+  });
+</script>
+<script>
+  let statusInterval = null;
+
+  // Function to start polling the status endpoint.
+  function startPolling() {
+    if (statusInterval) clearInterval(statusInterval);
+    statusInterval = setInterval(pollStatus, 1000);
+  }
+
+  // Function to stop polling.
+  function stopPolling() {
+    if (statusInterval) {
+      clearInterval(statusInterval);
+      statusInterval = null;
+    }
+  }
+
+  // Function to fetch and update the status.
+  function pollStatus() {
+    fetch('/status')
+      .then(response => response.json())
+      .then(data => {
+        const statusText = data.message || "";
+        const statusArea = document.getElementById('status-area');
+        const statusMessage = document.getElementById('status-message');
+
+        // Check for empty status or if task has completed.
+        if (!statusText.trim() || /completed/i.test(statusText)) {
+          statusArea.style.display = 'none';
+          stopPolling();
+        } else {
+          statusArea.style.display = 'block';
+          statusMessage.innerText = statusText;
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching status:', error);
+      });
+  }
+
+  // Listen for form submissions to start polling
+  document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+      form.addEventListener('submit', function() {
+        // Start status polling when the form is submitted.
+        startPolling();
+      });
+    });
+  });
+</script>
+
+</html>
