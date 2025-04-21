@@ -65,14 +65,14 @@ def parse_with_gemini(dom_chunks, parse_description, update_status=None):
     full_dom_content = "\n".join(dom_chunks)
     
     if update_status:
-        update_status("Preparing content for Gemini...")
+        update_status("Preparing content for information exptraction...")
 
     prompt = ChatPromptTemplate.from_template(template)
     chain = prompt | model
 
     try:
         if update_status:
-            update_status("Sending content to Gemini for parsing...")
+            update_status("Parsing content...")
         start_time = time.time()
         response = chain.invoke({
             "dom_content": full_dom_content,

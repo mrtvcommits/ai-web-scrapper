@@ -15,7 +15,7 @@ def scrape_website(website, update_status=None):
       update_status (callable): Optional callback to update status.
     """
     if update_status:
-        update_status("Connecting to Oxylabs API for scraping...")
+        update_status("Connecting to browser for scraping...")
 
     # Set up the payload using the provided API template.
     payload = {
@@ -36,12 +36,12 @@ def scrape_website(website, update_status=None):
     response = requests.post(api_url, auth=(USERNAME, PASSWORD), json=payload)
     
     if update_status:
-        update_status("Received response from Oxylabs API.")
+        update_status("Received response from browser.")
     
     result = response.json()
     print(result)
     if update_status:
-        update_status("Processing the API response...")
+        update_status("Processing the browser response...")
     
     # Extract HTML content from the JSON response.
     html_content = ""
