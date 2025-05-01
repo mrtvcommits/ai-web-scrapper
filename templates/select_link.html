@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark"> <!-- Assuming dark default -->
+<head>
+    <meta charset="UTF-8">
+    <title>Select Link - AI Knowledge Explorer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Add specific styles for the link selection list */
+        .link-list {
+            list-style: none;
+            padding: 0;
+            margin: 30px 0;
+            max-width: 800px; /* Limit width */
+            width: 100%;
+             text-align: left; /* Align list items left */
+        }
+        .link-list li {
+            background-color: var(--input-bg); /* Use input background */
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+         .link-list li:hover {
+             background-color: #2a2f3e; /* Slightly lighter on hover */
+         }
+
+        .link-list input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2); /* Make radio button slightly larger */
+            cursor: pointer;
+        }
+        .link-list label {
+            display: block; /* Ensure label takes full width */
+            cursor: pointer;
+            flex-grow: 1;
+        }
+         .link-list .link-title {
+             font-weight: 500;
+             font-size: 1.1rem;
+             color: var(--fg); /* Use main text color */
+             display: block; /* Title on its own line */
+             margin-bottom: 5px;
+         }
+         .link-list .link-url {
+             font-size: 0.9rem;
+             color: var(--footer-fg); /* Dimmer color for URL */
+             word-break: break-all; /* Prevent long URLs from overflowing */
+         }
+
+        .submit-selection-button {
+            margin-top: 20px; /* Reuse button styles from style.css */
+            background-color: var(--button-bg);
+            color: var(--button-fg);
+            border: none;
+            padding: 15px 28px;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .submit-selection-button:hover {
+             background-color: #0056b3;
+        }
+        .search-again-link {
+            display: block;
+            margin-top: 25px;
+            color: var(--button-bg);
+            text-decoration: none;
+        }
+        .search-again-link:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="logo"> AI Knowledge Explorer</div>
+        <div class="toggle-theme">
+            <input type="checkbox" id="theme-toggle" checked/>
+            <label for="theme-toggle"><i class="fas fa-sun"></i></label>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Select a Link to Analyze</h1>
+        <p class="tagline">Choose the most relevant result for "{{ topic }}"</p>
+
+        <!-- Status Area (Optional but good for feedback during selection if needed) -->
+        <div id="status-area" style="display: none; margin-top: 20px;">
+             <div class="loader"></div>
+             <p id="status-message"></p>
+         </div>
+
+        {% if search_results %}
+        <form method="POST" action="{{ url_for('scrape_selected_link') }}" class="link-selection-form">
+             <!-- Hidden input to pass the original topic along if needed -->
+             <input type="hidden" name="topic" value="{{ topic }}">
+
+            <ul class="link-list">
+                {% for result in search_results %}
+                <li>
+                    <input type="radio" id="link_{{ loop.index }}" name="selected_url" value="{{ result.link }}" required {% if loop.first %}checked{% endif %}>
+                    <label for="link_{{ loop.index }}">
+                        <span class="link-title">{{ result.title }}</span>
+                        <span class="link-url">{{ result.link }}</span>
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
+            <button type="submit" class="submit-selection-button">Scrape Selected Link</button>
+        </form>
+        {% else %}
+        <p>No links were found for the topic: "{{ topic }}".</p>
+        {% endif %}
+
+         <a href="{{ url_for('index') }}" class="search-again-link">Search for another topic</a>
+
+    </div>
+
+    <footer class="app-footer">
+        AI Knowledge Explorer © 2025
+    </footer>
+
+    <!-- Keep theme toggle and status polling scripts -->
+    <script>
+      const toggle = document.getElementById('theme-toggle');
+      const sunIcon = document.querySelector('.toggle-theme .fa-sun');
+
+      function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        toggle.checked = theme === 'dark';
+        // if (sunIcon) { sunIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; }
+      }
+
+      const currentTheme = localStorage.getItem('theme') || 'dark';
+      setTheme(currentTheme);
+
+      toggle.addEventListener('change', () => {
+        const newTheme = toggle.checked ? 'dark' : 'light';
+        setTheme(newTheme);
+      });
+    </script>
+     <script>
+      // Show the status area when the selection form is submitted
+      document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('.link-selection-form');
+        if (form) {
+          form.addEventListener('submit', function() {
+            // Display a message while the next step loads
+            const statusArea = document.getElementById('status-area');
+            const statusMessage = document.getElementById('status-message');
+            if(statusArea && statusMessage) {
+                statusMessage.innerText = "Processing selection, preparing to scrape...";
+                statusArea.style.display = 'block';
+            }
+          });
+        }
+      });
+      // Status polling might not be strictly needed on this page
+      // unless the selection itself triggers a background task
+    </script>
+
+</body>
+</html>

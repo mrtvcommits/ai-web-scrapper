@@ -1,207 +1,285 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Baloo+2&display=swap');
+/* Optional: Keep font import or choose a different sans-serif */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+/* Font Awesome import is now in HTML <head> */
 
 :root {
-  --bg: #f2f4f8;
-  --fg: #1a1a1a;
-  --card: #ffffff;
-  --button: #7458b7;
-  --input-bg: #ffffff;
+  /* Define light theme variables (optional, if toggle is kept) */
+  --bg-light: #f2f4f8;
+  --fg-light: #1a1a1a;
+  --input-bg-light: #ffffff;
+  --input-border-light: #ccc;
+  --button-bg-light: #007bff;
+  --button-fg-light: #ffffff;
+  --header-bg-light: #ffffff;
+  --header-fg-light: #1a1a1a;
+  --footer-fg-light: #6c757d;
+  --icon-color-light: #6c757d;
+  --loader-top-light: #007bff;
+
+
+  /* Define dark theme variables based on the image */
+  --bg-dark: #0a0e1a; /* Very dark blue background */
+  --fg-dark: #e0e0ff; /* Light blue/white text */
+  --input-bg-dark: #1c1f2a; /* Slightly lighter dark for input */
+  --input-border-dark: #3a3f50; /* Subtle border for input */
+  --button-bg-dark: #007bff; /* Bright blue button */
+  --button-fg-dark: #ffffff; /* White text on button */
+  --header-bg-dark: #0a0e1a; /* Same as body bg */
+  --header-fg-dark: #e0e0ff;
+  --footer-fg-dark: #808599; /* Dimmer text for footer */
+  --icon-color-dark: #808599; /* Icon color */
+  --loader-top-dark: #007bff; /* Blue spinner */
+}
+
+/* Set default theme variables */
+:root {
+  --bg: var(--bg-light);
+  --fg: var(--fg-light);
+  --input-bg: var(--input-bg-light);
+  --input-border: var(--input-border-light);
+  --button-bg: var(--button-bg-light);
+  --button-fg: var(--button-fg-light);
+  --header-bg: var(--header-bg-light);
+  --header-fg: var(--header-fg-light);
+  --footer-fg: var(--footer-fg-light);
+  --icon-color: var(--icon-color-light);
+  --loader-top: var(--loader-top-light);
 }
 
 [data-theme="dark"] {
-  --bg: #0e1117;
-  --fg: #e8eaf6;
-  --card: #7458b7;
-  --button: #0e1117;
-  --input-bg: #0e1117;
+  --bg: var(--bg-dark);
+  --fg: var(--fg-dark);
+  --input-bg: var(--input-bg-dark);
+  --input-border: var(--input-border-dark);
+  --button-bg: var(--button-bg-dark);
+  --button-fg: var(--button-fg-dark);
+  --header-bg: var(--header-bg-dark);
+  --header-fg: var(--header-fg-dark);
+  --footer-fg: var(--footer-fg-dark);
+  --icon-color: var(--icon-color-dark);
+  --loader-top: var(--loader-top-dark);
 }
+
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  transition: background 0.3s ease, color 0.3s ease;
+  /* Smoother transitions */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 body {
-  font-family: 'Baloo 2', cursive;
-  background: var(--bg);
+  font-family: 'Roboto', sans-serif; /* Using Roboto */
+  background-color: var(--bg);
   color: var(--fg);
   margin: 0;
   min-height: 100vh;
-  padding: 40px;
+  display: flex;
+  flex-direction: column; /* Stack header, container, footer */
+}
+
+/* Header Styling */
+.app-header {
+  background-color: var(--header-bg);
+  color: var(--header-fg);
+  padding: 15px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.logo {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+/* Main Content Container */
+.container {
+  flex-grow: 1; /* Allows container to fill space */
+  width: 100%;
+  max-width: 700px; /* Limit width for centering */
+  margin: 0 auto; /* Center horizontally */
+  padding: 60px 20px; /* Vertical padding */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-}
-
-/* Layout container */
-.container {
-  width: 100%;
-  max-width: 1100px;
-  background: var(--card);
-  padding: 40px;
-  border-radius: 20px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
   text-align: center;
 }
 
 /* Headings */
 h1 {
-  margin-bottom: 1rem;
-  font-weight: 600;
-  text-align: center;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 2.5rem;
-  margin-bottom: 10px;
+  font-size: 2.8rem; /* Larger heading */
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 15px;
 }
+
 p.tagline {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: var(--fg);
-  margin-bottom: 30px;
-  opacity: 0.75;
+  opacity: 0.8; /* Slightly less prominent */
+  margin-bottom: 40px;
 }
 
-/* Form structure */
-.form-group {
-  margin: 20px auto;
-  max-width: 600px;
-}
-
-label {
-  display: block;
-  font-weight: 500;
-  margin-bottom: 8px;
-  text-align: justify;
-}
-
-input[type="text"],textarea[readonly], pre ,textarea{
+/* Search Form Styling */
+.search-form {
   width: 100%;
-  padding: 15px;
-  font-size: 16px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  background: var(--input-bg);
-  color: var(--fg);
-}
-input[type="text"]:focus,
-textarea:focus {
-  border-color: #5c67f2;
-  outline: none;
 }
 
-/* Buttons */
-.button_div{
-  width: 100%;
+.search-bar {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-button {
-  margin-top: 20px;
-  background-color: var(--button);
-  border: 2px solid #2d2d44;
-  color: #fff;
-  padding: 12px 20px;
-  font-size: 16px;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #7458b7;
-  border: 2px solid #2d2d44;
-}
-
-/* Output section */
-.content-section {
-  margin-top: 30px;
-}
-
-/* Tables */
-table {
+  align-items: center;
+  position: relative; /* For positioning the icon */
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+  max-width: 600px; /* Control max width of the search bar itself */
+  margin: 0 auto; /* Center the search bar */
 }
 
-th, td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
-}
-
-th {
-  font-weight: 600;
-}
-
-/* Dark Mode Toggle Switch */
-.toggle-theme {
+.search-icon {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  left: 18px; /* Position icon inside the input area */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--icon-color);
+  font-size: 1.1rem;
+}
+
+input[type="text"] {
+  flex-grow: 1; /* Input takes available space */
+  padding: 15px 20px 15px 50px; /* Left padding for icon */
+  font-size: 1rem;
+  border-radius: 30px; /* Highly rounded corners */
+  border: 1px solid var(--input-border);
+  background-color: var(--input-bg);
+  color: var(--fg);
+  outline: none; /* Remove default focus outline */
+}
+
+input[type="text"]:focus {
+  border-color: var(--button-bg); /* Highlight with button color on focus */
+  /* Optional: add subtle shadow */
+  /* box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); */
+}
+
+button[type="submit"] {
+  background-color: var(--button-bg);
+  color: var(--button-fg);
+  border: none;
+  padding: 15px 28px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 30px; /* Match input rounding */
+  cursor: pointer;
+  margin-left: 10px; /* Space between input and button */
+  transition: background-color 0.2s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3; /* Darker shade on hover */
+  /* Adjust hover color for light theme if needed */
+  [data-theme="light"] & {
+      background-color: #0056b3;
+  }
+}
+
+
+/* Footer Styling */
+.app-footer {
+  background-color: var(--header-bg); /* Match header bg */
+  color: var(--footer-fg);
+  text-align: center;
+  padding: 15px 20px;
+  font-size: 0.9rem;
+  width: 100%;
+  margin-top: auto; /* Pushes footer to bottom */
+}
+
+
+/* --- Theme Toggle Styling (Using Icon Button) --- */
+.toggle-theme {
+  position: relative; /* Keep relative positioning if needed */
+  /* Resetting old switch styles if they conflict */
+  background: none;
+  width: auto;
+  height: auto;
 }
 
 .toggle-theme input[type="checkbox"] {
-  display: none;
+  display: none; /* Hide checkbox */
 }
 
 .toggle-theme label {
   display: inline-block;
-  background: #ccc;
-  border-radius: 20px;
-  width: 50px;
-  height: 26px;
-  position: relative;
+  background: none; /* No background for the label itself */
+  border-radius: 50%; /* Make it circular if needed */
+  width: 30px; /* Adjust size */
+  height: 30px; /* Adjust size */
+  line-height: 30px; /* Center icon vertically */
+  text-align: center;
   cursor: pointer;
+  color: var(--icon-color); /* Use theme variable for icon color */
+  font-size: 1.4rem; /* Icon size */
 }
 
+.toggle-theme label:hover {
+  color: var(--fg); /* Brighter color on hover */
+}
+
+/* Hide the ::after pseudo-element from old style */
 .toggle-theme label::after {
-  content: '';
-  width: 22px;
-  height: 22px;
-  background: white;
-  border-radius: 50%;
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  transition: left 0.2s;
+  content: none;
 }
 
-.toggle-theme input:checked + label::after {
-  left: 26px;
+/* Optional: Style icon specifically based on theme */
+[data-theme="dark"] .toggle-theme .fa-sun {
+  /* Styles for sun icon in dark mode (already default) */
 }
 
-.toggle-theme input:checked + label {
-  background: #7458b7;
+[data-theme="light"] .toggle-theme .fa-sun::before {
+ content: "\f186"; /* Change to moon icon (Font Awesome Unicode) in light mode */
 }
+
 
 /* --- Loader & Status Area Styling --- */
 #status-area {
   width: 100%;
   text-align: center;
-  margin: 20px 0;
+  /* margin: 20px 0; Defined inline for spacing */
 }
 
 .loader {
-  border: 8px solid #f3f3f3; /* Light grey background */
-  border-top: 8px solid var(--button); /* Button color or any accent color */
+  border: 6px solid var(--input-bg); /* Lighter background for spinner track */
+  border-top: 6px solid var(--loader-top); /* Use theme color for active part */
   border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  margin: auto;
+  width: 50px; /* Slightly smaller loader */
+  height: 50px;
+  margin: 20px auto; /* Center and space */
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-/* Status Message Styling */
 #status-message {
-  margin-top: 10px;
-  font-size: 1.1rem;
+  margin-top: 15px;
+  font-size: 1rem;
   color: var(--fg);
+  opacity: 0.9;
+}
+
+/* --- Remove styles not used in the new design --- */
+.form-group, label[for="url"], table, th, td, pre, textarea {
+  /* These were from the old design, remove if not needed */
+  /* display: none; /* Or just remove the CSS rules */
+}
+input[type="text"],textarea[readonly], pre ,textarea{
+    /* Resetting some old styles if they were too broad */
+    /* width: auto; */ /* Let flexbox handle width */
+}
+.button_div {
+    /* Removed as button is now inline */
 }

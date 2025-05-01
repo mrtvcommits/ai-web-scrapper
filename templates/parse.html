@@ -1,125 +1,414 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
+
 <head>
   <meta charset="UTF-8">
-  <title>AI Web Scraper - Parse</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <title>Parse Content - AI Knowledge Explorer AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Add specific styles for the parse page */
+    .context-info {
+      font-size: 0.9rem;
+      color: var(--footer-fg);
+      margin-bottom: 20px;
+      max-width: 800px;
+      width: 100%;
+      text-align: left;
+      background-color: var(--input-bg);
+      padding: 10px 15px;
+      border-radius: 5px;
+      border: 1px solid var(--input-border);
+      word-break: break-word;
+      /* Break long URLs */
+    }
+
+    .parse-form-group {
+      margin: 20px auto;
+      max-width: 800px;
+      /* Wider input for question */
+      width: 100%;
+      text-align: left;
+    }
+
+    .parse-form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .parse-form-group textarea {
+      width: 100%;
+      padding: 15px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--fg);
+      min-height: 80px;
+      /* Make textarea taller */
+      resize: vertical;
+      /* Allow vertical resize */
+    }
+
+    .parse-form-group textarea:focus {
+      border-color: var(--button-bg);
+      outline: none;
+    }
+
+    .result-section {
+      padding: 20px;
+      background-color: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      text-align: left;
+      max-width: 800px;
+      width: 100%;
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+
+    .result-section h3 {
+      margin-bottom: 15px;
+      color: var(--fg);
+      border-bottom: 1px solid var(--input-border);
+      padding-bottom: 10px;
+    }
+
+    .error-message {
+      color: #dc3545;
+      /* Red for errors */
+      margin-top: 15px;
+      padding: 10px;
+      background-color: rgba(220, 53, 69, 0.1);
+      border: 1px solid rgba(220, 53, 69, 0.3);
+      border-radius: 5px;
+    }
+
+    .action-buttons {
+      margin-top: 25px;
+    }
+
+    .action-buttons button,
+    .action-buttons a {
+      /* Reuse button styles */
+      background-color: var(--button-bg);
+      color: var(--button-fg);
+      border: none;
+      padding: 12px 25px;
+      /* Slightly smaller padding */
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      text-decoration: none;
+      /* For link */
+      display: inline-block;
+      /* For link */
+      margin: 0 10px;
+    }
+
+    .action-buttons button:hover,
+    .action-buttons a:hover {
+      background-color: #0056b3;
+    }
+
+    .action-buttons a {
+      /* Style link differently if needed */
+      background-color: #6c757d;
+      /* Grey for secondary action */
+    }
+
+    .action-buttons a:hover {
+      background-color: #5a6268;
+    }
+
+    /* Styles for Collapsible Section */
+    .collapsible-trigger {
+      cursor: pointer;
+      /* Indicate it's clickable */
+      display: flex;
+      /* Align heading text and icon */
+      justify-content: space-between;
+      /* Push icon to the right */
+      align-items: center;
+      user-select: none;
+      /* Prevent text selection on click */
+      border-bottom: 1px solid var(--input-border);
+      /* Keep the original border */
+      padding-bottom: 10px;
+      /* Keep padding */
+      margin-bottom: 15px;
+      /* Keep margin */
+    }
+
+    .toggle-icon {
+      font-weight: bold;
+      margin-left: 10px;
+      /* Space between text and icon */
+      color: var(--button-bg);
+      /* Use button color for icon */
+    }
+
+    .content-hidden {
+      display: none;
+      /* Class to hide content */
+    }
+
+    .collapsible-content {
+      /* Add some padding when visible if needed */
+      /* padding-top: 10px; */
+      overflow: hidden;
+      /* Good practice for transitions if added later */
+      transition: max-height 0.3s ease-out;
+      /* Optional: smooth animation */
+      max-height: 500px;
+      /* Set a large max-height for animation */
+    }
+
+    .collapsible-content.content-hidden {
+      max-height: 0;
+      /* For animation */
+      /* display: none; is still needed if not animating */
+    }
+             /* --- Table Styles --- */
+             .result-section table {
+             width: 100%; /* Make table take full width of its container */
+             border-collapse: collapse; /* Merge borders */
+             margin-top: 15px; /* Space above the table */
+             margin-bottom: 15px; /* Space below the table */
+             font-size: 0.95em; /* Slightly smaller font for table data */
+             color: var(--fg); /* Text color from theme */
+             background-color: var(--input-bg); /* Use input background for table */
+             box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
+             border-radius: 5px; /* Slightly rounded corners for the table */
+             overflow: hidden; /* Ensures border-radius clips content */
+         }
+
+         .result-section th,
+         .result-section td {
+             border: 1px solid var(--input-border); /* Border color from theme */
+             padding: 10px 12px; /* Padding inside cells */
+             text-align: left; /* Align text left by default */
+             vertical-align: top; /* Align content to the top of the cell */
+         }
+
+         .result-section th {
+             font-weight: 600; /* Make headers bold */
+             text-transform: capitalize; /* Capitalize header text */
+         }
+
+         /* Optional: Zebra-striping for better readability */
+         .result-section tr:nth-child(even) {
+             background-color: rgba(255, 255, 255, 0.03); /* Very subtle striping for dark theme */
+         }
+          [data-theme="light"] .result-section tr:nth-child(even) {
+               background-color: #f8f9fa; /* Standard light theme striping */
+          }
+
+
+         /* Optional: Style for table caption if AI generates one */
+         .result-section caption {
+             caption-side: top; /* Position caption above the table */
+             font-weight: bold;
+             font-size: 1.1em;
+             padding: 10px;
+             color: var(--fg);
+             text-align: left;
+             margin-bottom: 5px;
+         }
+  </style>
 </head>
+
 <body>
-  <div class="toggle-theme">
-    <input type="checkbox" id="theme-toggle" />
-    <label for="theme-toggle"></label>
-  </div>
-  <div class="container">
-    <h1>AI Web Scraper</h1>
-
-    <div class="content-section">
-      <h2>Cleaned DOM Content</h2>
-      <!-- Collapsible section using the details element -->
-      <details>
-        <summary>Show/Hide DOM Content</summary>
-        <textarea readonly rows="10">{{ dom_content }}</textarea>
-      </details>
+  <header class="app-header">
+    <div class="logo"> AI Knowledge Explorer</div>
+    <div class="toggle-theme">
+      <input type="checkbox" id="theme-toggle" checked />
+      <label for="theme-toggle"><i class="fas fa-sun"></i></label>
     </div>
+  </header>
 
-    <form method="POST" action="/parse">
-      <!-- Include scraped content as hidden input -->
-      <input type="hidden" name="dom_content" value="{{ dom_content }}">
-      <div class="form-group">
-        <label for="parse_description">Describe what you want to parse:</label>
-        <textarea id="parse_description" name="parse_description" rows="4" placeholder="{{parse_description}}" required></textarea>
-      </div>
-      <!-- Status / Loader Area -->
-      <div id="status-area" style="display: none;">
-        <div class="loader"></div>
-        <p id="status-message"></p>
-      </div>
-      <button type="submit">ASK</button>
-    </form>
+  <div class="container">
+    <h1>Ask About the Content</h1>
 
-    {% if parsed_result %}
-    <div class="content-section">
-      <h2>Parsed Result</h2>
-      <!-- Use `|safe` so Jinja won't escape HTML tags -->
-      <div>{{ parsed_result|safe }}</div>
+    {% if topic or scraped_url %}
+    <div class="context-info">
+      {% if topic %}<strong>Topic:</strong> {{ topic }}<br>{% endif %}
+      {% if scraped_url %}<strong>Source:</strong> {{ scraped_url }}{% endif %}
     </div>
     {% endif %}
-    
+
+    <!-- Display Raw Cleaned Content (Collapsible) -->
+    {% if dom_content %}
+    <div class="result-section collapsible-section">
+      <h3 id="toggle-source-heading" class="collapsible-trigger">
+        Source Content <span class="toggle-icon">[+]</span>
+      </h3>
+      <div id="source-content-wrapper" class="collapsible-content content-hidden"> {# Initially hidden #}
+        <p style="max-height: 300px; overflow-y: auto; font-size: 0.9em; white-space: pre-wrap;">{{ dom_content }}</p>
+      </div>
+    </div>
+    {% endif %}
+    <!-- End of Collapsible Cleaned Content Section -->
+
+    <!-- Display Error Messages -->
+    {% if error_message %}
+    <p class="error-message">{{ error_message }}</p>
+    {% endif %}
+
+    <!-- Status / Loader Area -->
+    <div id="status-area" style="display: none; margin: 20px 0;">
+      <div class="loader"></div>
+      <p id="status-message">Processing...</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('parse') }}" id="parse-form" style="width:100%">
+      <!-- Hidden field to pass the scraped content -->
+      <input type="hidden" name="dom_content" value="{{ dom_content }}">
+      <!-- Hidden fields to pass context back -->
+      <input type="hidden" name="topic" value="{{ topic }}">
+      <input type="hidden" name="scraped_url" value="{{ scraped_url }}">
+
+      <div class="parse-form-group">
+        <label for="parse_description">Your Question:</label>
+        <textarea id="parse_description" name="parse_description"
+          placeholder="e.g., What is the main product mentioned? Summarize the key features."
+          required>{{ parse_description }}</textarea> <!-- Retain question on page reload -->
+      </div>
+
+      <div class="action-buttons">
+        <button type="submit">Ask AI</button>
+        <a href="{{ url_for('index') }}">Start New Research</a>
+      </div>
+    </form>
+
+        <!-- Display the parsed result -->
+        {% if parsed_result %}
+        <div class="result-section">
+          <h3>Answer:</h3>
+          {# Use the |safe filter to render HTML content directly #}
+          {# Remove the surrounding <p> tag as the AI might return block elements like <table> #}
+          {{ parsed_result | safe }}
+        </div>
+        {% endif %}
+
   </div>
-</body>
-<script>
-  const toggle = document.getElementById('theme-toggle');
-  const currentTheme = localStorage.getItem('theme') || 'light';
-  document.documentElement.setAttribute('data-theme', currentTheme);
-  toggle.checked = currentTheme === 'dark';
 
-  toggle.addEventListener('change', () => {
-    const theme = toggle.checked ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  });
-</script>
-<script>
-  // Show the status area when any form is submitted
-  document.addEventListener('DOMContentLoaded', function() {
-    const forms = document.querySelectorAll('form');
-    forms.forEach(form => {
-      form.addEventListener('submit', function() {
-        document.getElementById('status-area').style.display = 'block';
-      });
-    });
-  });
-</script>
-<script>
-  let statusInterval = null;
+  <footer class="app-footer">
+    AI Knowledge Explorer © 2025
+  </footer>
 
-  // Function to start polling the status endpoint.
-  function startPolling() {
-    if (statusInterval) clearInterval(statusInterval);
-    statusInterval = setInterval(pollStatus, 1000);
-  }
+  <!-- Keep theme toggle and status polling scripts -->
+  <script>
+    const toggle = document.getElementById('theme-toggle');
+    const sunIcon = document.querySelector('.toggle-theme .fa-sun');
 
-  // Function to stop polling.
-  function stopPolling() {
-    if (statusInterval) {
-      clearInterval(statusInterval);
-      statusInterval = null;
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      toggle.checked = theme === 'dark';
     }
-  }
-
-  // Function to fetch and update the status.
-  function pollStatus() {
-    fetch('/status')
-      .then(response => response.json())
-      .then(data => {
-        const statusText = data.message || "";
-        const statusArea = document.getElementById('status-area');
-        const statusMessage = document.getElementById('status-message');
-
-        // Check for empty status or if task has completed.
-        if (!statusText.trim() || /completed/i.test(statusText)) {
-          statusArea.style.display = 'none';
-          stopPolling();
-        } else {
-          statusArea.style.display = 'block';
-          statusMessage.innerText = statusText;
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching status:', error);
-      });
-  }
-
-  // Listen for form submissions to start polling
-  document.addEventListener('DOMContentLoaded', function() {
-    const forms = document.querySelectorAll('form');
-    forms.forEach(form => {
-      form.addEventListener('submit', function() {
-        // Start status polling when the form is submitted.
-        startPolling();
-      });
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(currentTheme);
+    toggle.addEventListener('change', () => {
+      const newTheme = toggle.checked ? 'dark' : 'light';
+      setTheme(newTheme);
     });
-  });
-</script>
+  </script>
+  <script>
+    // Show status area on form submit
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('parse-form');
+      if (form) {
+        form.addEventListener('submit', function () {
+          document.getElementById('status-area').style.display = 'block';
+        });
+      }
+    });
+  </script>
+  <script>
+    // Status polling script (same as before)
+    function pollStatus() {
+      fetch('/status')
+        .then(response => response.ok ? response.json() : Promise.reject('Network response was not ok.'))
+        .then(data => {
+          const statusArea = document.getElementById('status-area');
+          const statusMessage = document.getElementById('status-message');
+          if (!statusArea || !statusMessage) return; // Exit if elements aren't found
+
+          const message = data.message || "";
+          // Show status only if it's not empty and not just signaling completion ("Parsing completed", "Idle" etc.)
+          const completionMessages = ["parsing complete", "scraping and cleaning complete", "idle", "error", "failed", "warning"];
+          const showStatus = message.trim() !== "" && !completionMessages.some(compMsg => message.toLowerCase().includes(compMsg));
+
+          if (showStatus) {
+            statusMessage.innerText = message;
+            statusArea.style.display = 'block';
+          } else if (message.toLowerCase().includes("error") || message.toLowerCase().includes("failed")) {
+            // Keep showing errors until next action
+            statusMessage.innerText = message;
+            statusArea.style.display = 'block';
+            // Maybe hide the loader for errors
+            const loader = statusArea.querySelector('.loader');
+            if (loader) loader.style.display = 'none';
+          } else {
+            // Hide for completion messages or empty message
+            statusArea.style.display = 'none';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching status:', error);
+          const statusArea = document.getElementById('status-area');
+          // Optionally hide status on error
+          if (statusArea) statusArea.style.display = 'none';
+        });
+    }
+    if (document.getElementById('status-area')) { // Only poll if status area exists
+      setInterval(pollStatus, 1200); // Poll slightly less frequently
+    }
+  </script>
+       <script>
+        // Script for Collapsible Section
+        document.addEventListener('DOMContentLoaded', function() {
+            const trigger = document.getElementById('toggle-source-heading');
+            const contentWrapper = document.getElementById('source-content-wrapper');
+            const icon = trigger ? trigger.querySelector('.toggle-icon') : null;
+
+            if (trigger && contentWrapper && icon) {
+                // Ensure it starts visually consistent (hidden class is set in HTML)
+                // icon.textContent = '[+]'; // Initial icon state (already set in HTML)
+
+                trigger.addEventListener('click', function() {
+                    // Toggle the hidden class on the content wrapper
+                    contentWrapper.classList.toggle('content-hidden');
+
+                    // Update the icon text based on visibility
+                    if (contentWrapper.classList.contains('content-hidden')) {
+                        icon.textContent = '[+]';
+                        // Optional: Set aria-expanded for accessibility
+                        // trigger.setAttribute('aria-expanded', 'false');
+                    } else {
+                        icon.textContent = '[-]';
+                        // Optional: Set aria-expanded for accessibility
+                        // trigger.setAttribute('aria-expanded', 'true');
+                    }
+                });
+
+                // Optional: Add keyboard support (Enter/Space to toggle)
+                trigger.setAttribute('tabindex', '0'); // Make heading focusable
+                trigger.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault(); // Prevent default space scroll
+                        trigger.click(); // Simulate a click
+                    }
+                });
+            } else {
+                console.warn("Collapsible section elements not found.");
+            }
+        });
+     </script>
+</body>
 
 </html>
